@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+    <title>Smart Parking RL System</title>
+
+    <style>
+
+        body {
+
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: linear-gradient(to right, #0f2027, #203a43, #2c5364);
+            color: white;
+            overflow-x: hidden;
+
+        }
+
+        h1 {
+
+            text-align: center;
+            margin-top: 20px;
+            font-size: 48px;
+
+        }
+
+        .dashboard {
+
+            display: flex;
+            justify-content: center;
+            gap: 25px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+
+        }
+
+        .card {
+
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(10px);
+            padding: 20px;
+            width: 200px;
+            border-radius: 20px;
+            text-align: center;
+            box-shadow: 0px 0px 15px rgba(255,255,255,0.15);
+
+        }
+
+        .card h2 {
+
+            font-size: 22px;
+
+        }
+
+        .card h1 {
+
+            font-size: 38px;
+            margin-top: 10px;
+
+        }
+
+        .simulation-container {
+
+            margin-top: 50px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 60px;
+            flex-wrap: wrap;
+
+        }
+
+        .queue-section {
+
+            width: 300px;
+            text-align: center;
+
+        }
+
+        .queue-title {
+
+            font-size: 28px;
+            margin-bottom: 25px;
+
+        }
+
+        .vehicle-queue {
+
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            flex-wrap: wrap;
+
+        }
+
+        .vehicle {
+
+            width: 90px;
+            height: 45px;
+            background: #00e5ff;
+            border-radius: 12px;
+            position: relative;
+            animation: blink 1s infinite alternate;
+
+        }
+
+        .vehicle::before {
+
+            content: "";
+            width: 20px;
+            height: 20px;
+            background: black;
+            border-radius: 50%;
+            position: absolute;
+            bottom: -10px;
+            left: 10px;
+
+        }
+
+        .vehicle::after {
+
+            content: "";
+            width: 20px;
+            height: 20px;
+            background: black;
+            border-radius: 50%;
+            position: absolute;
+            bottom: -10px;
+            right: 10px;
+
+        }
+
+        @keyframes blink {
+
+            from {
+                box-shadow: 0px 0px 10px #00e5ff;
+            }
+
+            to {
+                box-shadow: 0px 0px 30px #00e5ff;
+            }
+
+        }
+
+        .parking-area {
+
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+            justify-content: center;
+
+        }
+
+        .slot-container {
+
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+
+        }
+
+        .slot-label {
+
+            margin-bottom: 10px;
+            font-size: 22px;
+            font-weight: bold;
+
+        }
+
+        .slot {
+
+            width: 130px;
+            height: 240px;
+            background: #1e1e1e;
+            border-radius: 20px;
+            position: relative;
+            border: 4px solid white;
+            overflow: hidden;
+
+        }
+
+        .car-inside {
+
+            width: 90px;
+            height: 45px;
+            border-radius: 12px;
+            position: absolute;
+            left: 18px;
+            bottom: 20px;
+            transition: 1s;
+
+        }
+
+        .car-inside::before {
+
+            content: "";
+            width: 20px;
+            height: 20px;
+            background: black;
+            border-radius: 50%;
+            position: absolute;
+            bottom: -10px;
+            left: 10px;
+
+        }
+
+        .car-inside::after {
+
+            content: "";
+            width: 20px;
+            height: 20px;
+            background: black;
+            border-radius: 50%;
+            position: absolute;
+            bottom: -10px;
+            right: 10px;
+
+        }
+
+        .occupied-car {
+
+            background: #d50000;
+
+        }
+
+        .selected-car {
+
+            background: #2962ff;
+            animation: glow 1s infinite alternate;
+
+        }
+
+        @keyframes glow {
+
+            from {
+                box-shadow: 0px 0px 10px #2962ff;
+            }
+
+            to {
+                box-shadow: 0px 0px 25px #2962ff;
+            }
+
+        }
+
+        .ai-panel {
+
+            margin: 50px auto;
+            width: 75%;
+            background: rgba(255,255,255,0.08);
+            padding: 30px;
+            border-radius: 20px;
+            text-align: center;
+            box-shadow: 0px 0px 15px rgba(255,255,255,0.1);
+
+        }
+
+        .ai-panel h2 {
+
+            color: #00e5ff;
+            margin-bottom: 25px;
+            font-size: 32px;
+
+        }
+
+        .ai-panel p {
+
+            font-size: 20px;
+            margin: 14px 0;
+
+        }
+
+        .controls {
+
+            margin-top: 40px;
+            text-align: center;
+            margin-bottom: 40px;
+
+        }
+
+        button {
+
+            padding: 15px 30px;
+            margin: 10px;
+            border: none;
+            border-radius: 12px;
+            font-size: 18px;
+            cursor: pointer;
+            transition: 0.3s;
+
+        }
+
+        button:hover {
+
+            transform: scale(1.05);
+
+        }
+
+        .allocate-btn {
+
+            background: #2962ff;
+            color: white;
+
+        }
+
+        .reset-btn {
+
+            background: #616161;
+            color: white;
+
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+    <h1>Smart Parking Optimization using RL</h1>
+
+    <div class="dashboard">
+
+        <div class="card">
+            <h2>Occupancy</h2>
+            <h1>{{ occupancy }}%</h1>
+        </div>
+
+        <div class="card">
+            <h2>Free Slots</h2>
+            <h1>{{ free_slots }}</h1>
+        </div>
+
+        <div class="card">
+            <h2>Vehicles Processed</h2>
+            <h1>{{ total_vehicles }}</h1>
+        </div>
+
+        <div class="card">
+            <h2>Current Reward</h2>
+
+            <h1>
+
+                {% if last_reward >= 0 %}
+
+                    <span style="color:#00ff99;">
+                        +{{ last_reward }}
+                    </span>
+
+                {% else %}
+
+                    <span style="color:#ff5252;">
+                        {{ last_reward }}
+                    </span>
+
+                {% endif %}
+
+            </h1>
+
+        </div>
+
+    </div>
+
+    <div class="simulation-container">
+
+        <div class="queue-section">
+
+            <div class="queue-title">
+                Incoming Vehicle Queue
+            </div>
+
+            <div class="vehicle-queue">
+
+                {% for i in range(vehicle_queue) %}
+
+                    <div class="vehicle"></div>
+
+                {% endfor %}
+
+            </div>
+
+        </div>
+
+        <div class="parking-area">
+
+            {% for slot in slots %}
+
+            <div class="slot-container">
+
+                <div class="slot-label">
+                    P{{ loop.index }}
+                </div>
+
+                <div class="slot">
+
+                    {% if slot == "occupied" %}
+
+                        <div class="car-inside occupied-car"></div>
+
+                    {% elif slot == "selected" %}
+
+                        <div class="car-inside selected-car"></div>
+
+                    {% endif %}
+
+                </div>
+
+            </div>
+
+            {% endfor %}
+
+        </div>
+
+    </div>
+
+    <div class="ai-panel">
+
+        <h2>AI Decision Engine</h2>
+
+        <p>
+            <strong>Parking State:</strong>
+            {{ parking_state }}
+        </p>
+
+        <p>
+            <strong>Selected Slot:</strong>
+            {{ last_selected_slot }}
+        </p>
+
+        <p>
+            <strong>Allocation Status:</strong>
+            {{ allocation_status }}
+        </p>
+
+        <p>
+            <strong>Reward:</strong>
+
+            {% if last_reward >= 0 %}
+
+                <span style="color:#00ff99;">
+                    +{{ last_reward }}
+                </span>
+
+            {% else %}
+
+                <span style="color:#ff5252;">
+                    {{ last_reward }}
+                </span>
+
+            {% endif %}
+
+        </p>
+
+    </div>
+
+    <div class="controls">
+
+        <a href="/allocate">
+
+            <button class="allocate-btn">
+
+                Allocate Parking Slot
+
+            </button>
+
+        </a>
+
+        <a href="/reset">
+
+            <button class="reset-btn">
+
+                Reset Parking
+
+            </button>
+
+        </a>
+
+    </div>
+
+</body>
+
+</html>
